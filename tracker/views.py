@@ -8,7 +8,16 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
+
 # Create your views here.
+
+
+class StandardPagination(PageNumberPagination):
+    page_size = 3
+    max_page_size = 100
+    
+
 
 
 @api_view(['POST'])
@@ -37,38 +46,53 @@ def login_api(request):
 class CompanyModelViewSet(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
     
-    def queryset(self):
-        return Company.objects.filter(user = self.request.user)
-
+    def get_queryset(self):
+        return Company.objects.filter(user = self.request.user.id)
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+    
+    pagination_class = StandardPagination
 
 
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 class InterviewModelViewSet(viewsets.ModelViewSet):
     serializer_class = InterviewSerializer
-    def queryset(self):
+    def get_queryset(self):
         return Interview.objects.filter(user = self.request.user)
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
+    pagination_class = StandardPagination
 
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 class ApplicationModelViewSet(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
-    def queryset(self):
+    def get_queryset(self):
         return Application.objects.filter(user = self.request.user)
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
+
+    pagination_class = StandardPagination
 
 
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 class ContactModelViewSet(viewsets.ModelViewSet):
     serializer_class = ContactSerializer
-    def queryset(self):
+    def get_queryset(self):
         return Contact.objects.filter(user = self.request.user)
 
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
+        
+    pagination_class = StandardPagination
     
 
